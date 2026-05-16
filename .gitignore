@@ -1,0 +1,35 @@
+# === IDE ===
+.idea/
+.vscode/
+*.iml
+
+# === Qoder ===
+.qoder/
+
+# === 前端 (Vue + Vite) ===
+blog-frontend/node_modules/
+blog-frontend/dist/
+blog-frontend/dist.zip
+
+# === 后端 (Spring Boot + Maven) ===
+blog-backend/target/
+*.class
+*.jar
+*.war
+!*.jar.original
+
+# === 后端配置文件（含敏感信息，不上传） ===
+blog-backend/src/main/resources/application.yml
+
+# === 上传文件（运行时数据，非源码） ===
+blog-backend/src/main/resources/upload/
+
+# === 系统文件 ===
+Thumbs.db
+.DS_Store
+*.log
+*.tmp
+
+# === 环境变量（敏感信息） ===
+.env.local
+.env.*.local
