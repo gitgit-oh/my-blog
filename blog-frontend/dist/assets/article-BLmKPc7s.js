@@ -1,1 +1,0 @@
-import{r as e}from"./request-BQapSUuR.js";const c=()=>e.get("/init"),r=t=>e.get("/articles",{params:{outlineId:t}}),i=t=>e.get(`/articles/${t}`),l=t=>e.get("/search",{params:{keyword:t}}),n=t=>e.post("/admin/articles",t),o=(t,s)=>e.put(`/admin/articles/${t}`,s),m=t=>e.delete(`/admin/articles/${t}`);export{r as a,n as c,m as d,i as g,c as i,l as s,o as u};

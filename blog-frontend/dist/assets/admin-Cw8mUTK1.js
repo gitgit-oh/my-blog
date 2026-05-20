@@ -1,1 +1,0 @@
-import{r as t}from"./request-BQapSUuR.js";const n=a=>t.post("/admin/login",a),e=()=>t.get("/admin/stats"),r=a=>{const s=new FormData;return s.append("file",a),t.post("/admin/upload",s,{headers:{"Content-Type":"multipart/form-data"}})},p=a=>t.post("/admin/change-password",a);export{p as c,e as g,n as l,r as u};

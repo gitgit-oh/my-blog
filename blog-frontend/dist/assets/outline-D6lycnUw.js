@@ -1,1 +1,0 @@
-import{r as e}from"./request-BQapSUuR.js";const a=t=>e.get("/outlines",{params:{categoryId:t}}),i=t=>e.post("/admin/outlines",t),o=(t,s)=>e.put(`/admin/outlines/${t}`,s),u=t=>e.delete(`/admin/outlines/${t}`);export{i as c,u as d,a as g,o as u};

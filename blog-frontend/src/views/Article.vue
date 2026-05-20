@@ -9,24 +9,37 @@
         <span v-if="article.createdAt">{{ formatDate(article.createdAt) }}</span>
         <span v-if="article.updatedAt">Updated: {{ formatDate(article.updatedAt) }}</span>
       </div>
-      <div class="article-content" v-html="article.content"></div>
+      <div ref="contentRef" class="article-content" v-html="article.content"></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getArticle } from '../api/article'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/atom-one-dark.css'
 
 const route = useRoute()
 const router = useRouter()
 const article = ref({})
+const contentRef = ref(null)
 
 onMounted(async () => {
   const id = route.params.id
   article.value = await getArticle(id)
+  await nextTick()
+  highlightCode()
 })
+
+function highlightCode() {
+  if (!contentRef.value) return
+  contentRef.value.querySelectorAll('pre code').forEach((block) => {
+    block.classList.remove('hljs')
+    hljs.highlightElement(block)
+  })
+}
 
 function goBack() {
   router.push('/')
@@ -106,18 +119,36 @@ function formatDate(dateStr) {
 }
 
 .article-content :deep(pre) {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 16px;
-  border-radius: 10px;
+  background: #1e1e2e;
+  padding: 20px;
+  border-radius: 12px;
   overflow-x: auto;
-  margin: 16px 0;
+  margin: 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
 }
 
-.article-content :deep(code) {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2px 6px;
-  border-radius: 4px;
+.article-content :deep(pre code) {
+  background: transparent;
+  padding: 0;
   font-size: 14px;
+  line-height: 1.7;
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  color: #cdd6f4;
+}
+
+.article-content :deep(pre code.hljs) {
+  display: block;
+  overflow-x: auto;
+}
+
+.article-content :deep(:not(pre) > code) {
+  background: rgba(102, 126, 234, 0.12);
+  color: #cdd6f4;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
 }
 
 .article-content :deep(blockquote) {

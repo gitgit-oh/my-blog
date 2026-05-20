@@ -1,1 +1,0 @@
-import{r as t}from"./request-BQapSUuR.js";const s=()=>t.get("/categories"),r=e=>t.post("/admin/categories",e),g=(e,a)=>t.put(`/admin/categories/${e}`,a),c=e=>t.delete(`/admin/categories/${e}`);export{r as c,c as d,s as g,g as u};
