@@ -14,11 +14,11 @@
         <option :value="null">All Outlines</option>
         <option v-for="o in filteredOutlines" :key="o.id" :value="o.id">{{ o.title }}</option>
       </select>
-      <button class="btn-primary" @click="loadArticles">Filter</button>
+      <button class="btn-primary" @click="filterArticles">Filter</button>
     </div>
 
-    <div class="articles-list">
-      <div v-for="article in pagedArticles" :key="article.id" class="article-card glass-card">
+    <div class="articles-list" v-if="!loading">
+      <div v-for="article in articles" :key="article.id" class="article-card glass-card">
         <div class="article-info">
           <h4>{{ article.title }}</h4>
           <p class="article-date">{{ formatDate(article.createdAt) }} | Sort: {{ article.sortOrder ?? 0 }}</p>
@@ -30,13 +30,18 @@
       </div>
     </div>
 
+    <div v-if="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading...</p>
+    </div>
+
     <div class="pagination">
-      <span class="page-total">Total: {{ articles.length }}</span>
-      <button class="btn-secondary" :disabled="currentPage === 1" @click="currentPage = 1">First</button>
-      <button class="btn-secondary" :disabled="currentPage === 1" @click="currentPage--">Prev</button>
+      <span class="page-total">Total: {{ totalArticles }}</span>
+      <button class="btn-secondary" :disabled="currentPage === 1" @click="changePage(1)">First</button>
+      <button class="btn-secondary" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Prev</button>
       <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-      <button class="btn-secondary" :disabled="currentPage === totalPages" @click="currentPage++">Next</button>
-      <button class="btn-secondary" :disabled="currentPage === totalPages" @click="currentPage = totalPages">Last</button>
+      <button class="btn-secondary" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Next</button>
+      <button class="btn-secondary" :disabled="currentPage === totalPages" @click="changePage(totalPages)">Last</button>
       <div class="page-jump">
         <span>Go to</span>
         <input v-model.number="jumpPage" @keyup.enter="handleJump" class="jump-input" type="number" min="1" :max="totalPages" />
@@ -51,13 +56,15 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCategories } from '../../api/category'
 import { getOutlines } from '../../api/outline'
-import { getArticles, deleteArticle } from '../../api/article'
+import { getArticlesPage, deleteArticle } from '../../api/article'
 
 const route = useRoute()
 const router = useRouter()
 const categories = ref([])
 const outlines = ref([])
 const articles = ref([])
+const totalArticles = ref(0)
+const loading = ref(false)
 const selectedCategory = ref(route.query.category ? Number(route.query.category) : null)
 const selectedOutline = ref(route.query.outline ? Number(route.query.outline) : null)
 const currentPage = ref(1)
@@ -69,12 +76,7 @@ const filteredOutlines = computed(() => {
   return outlines.value.filter(o => o.categoryId === selectedCategory.value)
 })
 
-const pagedArticles = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return articles.value.slice(start, start + pageSize)
-})
-
-const totalPages = computed(() => Math.ceil(articles.value.length / pageSize) || 1)
+const totalPages = computed(() => Math.ceil(totalArticles.value / pageSize) || 1)
 
 onMounted(async () => {
   categories.value = await getCategories()
@@ -95,30 +97,41 @@ function goEdit(id) {
 }
 
 async function loadArticles() {
+  loading.value = true
+  jumpPage.value = currentPage.value
+  const res = await getArticlesPage(currentPage.value, pageSize, selectedOutline.value || undefined)
+  articles.value = res.content || []
+  totalArticles.value = res.totalElements || 0
+  loading.value = false
+}
+
+async function filterArticles() {
   currentPage.value = 1
   jumpPage.value = 1
-  if (selectedOutline.value) {
-    articles.value = await getArticles(selectedOutline.value)
-  } else {
-    articles.value = []
-    const targetOutlines = filteredOutlines.value.length ? filteredOutlines.value : outlines.value
-    for (const o of targetOutlines) {
-      const list = await getArticles(o.id)
-      articles.value.push(...list)
-    }
+  await loadArticles()
+}
+
+function changePage(page) {
+  if (page >= 1 && page <= totalPages.value && page !== currentPage.value) {
+    currentPage.value = page
+    loadArticles()
   }
 }
 
 function handleJump() {
   if (jumpPage.value >= 1 && jumpPage.value <= totalPages.value) {
-    currentPage.value = jumpPage.value
+    changePage(jumpPage.value)
   }
 }
 
 async function del(id) {
   if (!confirm('Are you sure to delete this article?')) return
   await deleteArticle(id)
-  loadArticles()
+  if (articles.value.length === 1 && currentPage.value > 1) {
+    changePage(currentPage.value - 1)
+  } else {
+    loadArticles()
+  }
 }
 
 function formatDate(dateStr) {
@@ -225,5 +238,32 @@ function formatDate(dateStr) {
 .jump-input:focus {
   outline: none;
   border-color: #667eea;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
 }
 </style>

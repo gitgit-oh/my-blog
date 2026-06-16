@@ -15,18 +15,6 @@
       <button class="btn-primary" @click="handleSearch">Search</button>
     </div>
 
-    <div v-if="searchResults.length" class="search-results glass-card">
-      <h3>Search Results</h3>
-      <div
-        v-for="item in searchResults"
-        :key="item.id"
-        class="result-item"
-        @click="goToArticle(item.id)"
-      >
-        {{ item.title }}
-      </div>
-    </div>
-
     <div class="content">
       <div class="categories">
         <div
@@ -82,14 +70,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { initHome, searchArticles } from '../api/article'
+import { initHome } from '../api/article'
 
 const router = useRouter()
 const categories = ref([])
 const outlines = ref([])
 const articlesMap = ref(new Map())
 const searchKeyword = ref('')
-const searchResults = ref([])
 
 // 右侧面板状态
 const sidePanelVisible = ref(false)
@@ -159,13 +146,10 @@ function goToArticle(id) {
   router.push(`/article/${id}`)
 }
 
-async function handleSearch() {
-  if (!searchKeyword.value.trim()) {
-    searchResults.value = []
-    return
-  }
-  const res = await searchArticles(searchKeyword.value)
-  searchResults.value = res.results || []
+function handleSearch() {
+  const keyword = searchKeyword.value.trim()
+  if (!keyword) return
+  router.push(`/search?keyword=${encodeURIComponent(keyword)}`)
 }
 </script>
 

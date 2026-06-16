@@ -25,10 +25,14 @@ import { getStats } from '../../api/admin'
 const stats = reactive({ categories: 0, outlines: 0, articles: 0 })
 
 onMounted(async () => {
-  const data = await getStats()
-  stats.categories = data.categories
-  stats.outlines = data.outlines
-  stats.articles = data.articles
+  try {
+    const data = await getStats()
+    stats.categories = data.categories ?? 0
+    stats.outlines = data.outlines ?? 0
+    stats.articles = data.articles ?? 0
+  } catch (e) {
+    console.error('Failed to load stats:', e)
+  }
 })
 </script>
 

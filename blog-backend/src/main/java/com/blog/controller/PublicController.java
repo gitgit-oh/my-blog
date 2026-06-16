@@ -119,15 +119,39 @@ public class PublicController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchArticles(@RequestParam String keyword) {
-        if (articleSearchRepository != null) {
-            try {
-                List<ArticleDocument> results = articleSearchRepository.findByTitleContaining(keyword);
-                return ResponseEntity.ok(Map.of("results", results));
-            } catch (Exception e) {
-                // ES search failed, fall back to database
-            }
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ResponseEntity.ok(Map.of("results", List.of()));
         }
-        List<Article> results = articleService.searchByKeyword(keyword);
+
+        // 预加载所有 outlines 和 categories 到 Map，避免 N+1 查询
+        List<Outline> allOutlines = outlineService.listAll();
+        Map<Integer, Outline> outlineMap = new HashMap<>();
+        for (Outline o : allOutlines) {
+            outlineMap.put(o.getId(), o);
+        }
+        List<Category> allCategories = categoryService.listAll();
+        Map<Integer, Category> categoryMap = new HashMap<>();
+        for (Category c : allCategories) {
+            categoryMap.put(c.getId(), c);
+        }
+
+        List<Article> dbResults = articleService.searchByKeyword(keyword.trim());
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (Article article : dbResults) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", article.getId());
+            item.put("title", article.getTitle());
+            // 关联 outline 和 category 名称
+            Outline outline = outlineMap.get(article.getOutlineId());
+            if (outline != null) {
+                item.put("outlineName", outline.getTitle());
+                Category category = categoryMap.get(outline.getCategoryId());
+                if (category != null) {
+                    item.put("categoryName", category.getName());
+                }
+            }
+            results.add(item);
+        }
         return ResponseEntity.ok(Map.of("results", results));
     }
 }

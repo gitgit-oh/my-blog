@@ -13,7 +13,12 @@
       <button class="btn-primary" @click="load">Filter</button>
     </div>
 
-    <div class="list">
+    <div v-if="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading...</p>
+    </div>
+
+    <div v-else class="list">
       <div v-for="item in pagedOutlines" :key="item.id" class="list-item glass-card">
         <div class="item-info">
           <h4>{{ item.title }}</h4>
@@ -73,6 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getCategories } from '../../api/category'
 import { getOutlines, createOutline, updateOutline, deleteOutline } from '../../api/outline'
 
+const loading = ref(false)
 const categories = ref([])
 const outlines = ref([])
 const showModal = ref(false)
@@ -98,9 +104,11 @@ onMounted(async () => {
 })
 
 async function load() {
+  loading.value = true
   outlines.value = await getOutlines(selectedCategory.value)
   currentPage.value = 1
   jumpPage.value = 1
+  loading.value = false
 }
 
 function onCategoryChange() {
@@ -269,5 +277,32 @@ async function del(id) {
 .jump-input:focus {
   outline: none;
   border-color: #667eea;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
 }
 </style>

@@ -47,10 +47,7 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getStats() {
         int categories = categoryService.listAll().size();
         int outlines = outlineService.listAll().size();
-        int articles = 0;
-        for (Outline outline : outlineService.listAll()) {
-            articles += articleService.listByOutlineId(outline.getId()).size();
-        }
+        int articles = articleService.countAll();
         return ResponseEntity.ok(Map.of(
             "categories", categories,
             "outlines", outlines,
@@ -129,6 +126,13 @@ public class AdminController {
     }
 
     // Articles
+    @GetMapping("/articles/page")
+    public ResponseEntity<?> listArticlesPage(@RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "10") int size,
+                                              @RequestParam(required = false) Integer outlineId) {
+        return ResponseEntity.ok(articleService.listByPage(outlineId, page, size));
+    }
+
     @PostMapping("/articles")
     public ResponseEntity<?> createArticle(@RequestBody Article article) {
         articleService.create(article);

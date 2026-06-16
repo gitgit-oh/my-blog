@@ -12,4 +12,7 @@ export const createArticle = (data) => request.post('/admin/articles', data)
 
 export const updateArticle = (id, data) => request.put(`/admin/articles/${id}`, data)
 
+export const getArticlesPage = (page, size, outlineId) =>
+  request.get('/admin/articles/page', { params: { page, size, outlineId } })
+
 export const deleteArticle = (id) => request.delete(`/admin/articles/${id}`)

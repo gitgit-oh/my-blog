@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -43,6 +44,22 @@ public class ArticleService {
 
     public List<Article> listByOutlineId(Integer outlineId) {
         return articleMapper.findByOutlineId(outlineId);
+    }
+
+    public int countAll() {
+        return articleMapper.countAll();
+    }
+
+    public Map<String, Object> listByPage(Integer outlineId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Article> articles = articleMapper.findByPage(outlineId, offset, size);
+        int total = articleMapper.countByFilter(outlineId);
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("content", articles);
+        result.put("totalElements", total);
+        result.put("totalPages", (int) Math.ceil((double) total / size));
+        result.put("currentPage", page);
+        return result;
     }
 
     @Cacheable(value = "articles", key = "#id")

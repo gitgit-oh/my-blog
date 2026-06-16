@@ -2,6 +2,7 @@ D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\config\DataInitiali
 D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\mapper\AdminMapper.java
 D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\controller\AdminController.java
 D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\entity\ArticleDocument.java
+D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\util\GenHashMain.java
 D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\config\RedisConfig.java
 D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\config\JwtInterceptor.java
 D:\qoder_project\my-Blob\blog-backend\src\main\java\com\blog\util\JwtUtil.java
